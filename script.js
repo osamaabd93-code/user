@@ -341,7 +341,7 @@ function setupSaveButtons() {
             userRole,
             bonus: $("user-return-bonus").value,
             discount: $("user-return-discount").value,
-            evaluation: $("user-return-eval").value,
+            netKm: $("user-return-net-km").value,
             date: new Date().toISOString()
         };
         if (!appData.returnInfos) appData.returnInfos = [];
