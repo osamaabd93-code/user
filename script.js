@@ -129,6 +129,7 @@ function setupLoginSystem() {
             $("user-app").classList.remove("hidden");
             $("user-pass-input").value = "";
             refreshAllUI();
+            autoUser();
         } else {
             showCustomAlert("اسم المستخدم أو كلمة المرور غير صحيحة");
         }
@@ -193,14 +194,23 @@ function getCurrentFinanceForUser() {
 
 function updateAdvanceDisplay() {
     if (!window.loggedInUser) return;
-    let currentAdvance = 0;
+    let iqd = 0, usd = 0, sar = 0;
     const latestFinance = getCurrentFinanceForUser();
     if (latestFinance) {
-        if (latestFinance.driverName === window.loggedInUser) currentAdvance = Number(latestFinance.driverAdvance) || 0;
-        else if (latestFinance.mandoubName === window.loggedInUser) currentAdvance = Number(latestFinance.mandoubAdvance) || 0;
+        if (latestFinance.driverName === window.loggedInUser) {
+            iqd = Number(latestFinance.driverLoanIQD) || 0;
+            usd = Number(latestFinance.driverLoanUSD) || 0;
+            sar = Number(latestFinance.driverLoanSAR) || 0;
+        } else if (latestFinance.mandoubName === window.loggedInUser) {
+            iqd = Number(latestFinance.mandoubLoanIQD) || 0;
+            usd = Number(latestFinance.mandoubLoanUSD) || 0;
+            sar = Number(latestFinance.mandoubLoanSAR) || 0;
+        }
     }
-    $("expenses-driver-name").textContent = window.loggedInUser;
-    $("expenses-advance-amount").textContent = currentAdvance;
+    if($("expenses-driver-name")) $("expenses-driver-name").textContent = window.loggedInUser;
+    if($("expenses-loan-iqd")) $("expenses-loan-iqd").textContent = iqd;
+    if($("expenses-loan-usd")) $("expenses-loan-usd").textContent = usd;
+    if($("expenses-loan-sar")) $("expenses-loan-sar").textContent = sar;
 }
 
 function renderTasksList() {
@@ -251,8 +261,17 @@ window.deleteUserExpense = (i) => {
         const exp = appData.userExpenses[i];
         const latestFinance = getCurrentFinanceForUser();
         if (latestFinance) {
-            if (latestFinance.driverName === window.loggedInUser) latestFinance.driverAdvance = (Number(latestFinance.driverAdvance) || 0) + Number(exp.amount || 0);
-            else if (latestFinance.mandoubName === window.loggedInUser) latestFinance.mandoubAdvance = (Number(latestFinance.mandoubAdvance) || 0) + Number(exp.amount || 0);
+            const amt = Number(exp.amount) || 0;
+            const cur = exp.currency || "دينار";
+            if (latestFinance.driverName === window.loggedInUser) {
+                if (cur === "دينار") latestFinance.driverLoanIQD = (Number(latestFinance.driverLoanIQD) || 0) + amt;
+                else if (cur === "دولار") latestFinance.driverLoanUSD = (Number(latestFinance.driverLoanUSD) || 0) + amt;
+                else if (cur === "ريال") latestFinance.driverLoanSAR = (Number(latestFinance.driverLoanSAR) || 0) + amt;
+            } else if (latestFinance.mandoubName === window.loggedInUser) {
+                if (cur === "دينار") latestFinance.mandoubLoanIQD = (Number(latestFinance.mandoubLoanIQD) || 0) + amt;
+                else if (cur === "دولار") latestFinance.mandoubLoanUSD = (Number(latestFinance.mandoubLoanUSD) || 0) + amt;
+                else if (cur === "ريال") latestFinance.mandoubLoanSAR = (Number(latestFinance.mandoubLoanSAR) || 0) + amt;
+            }
         }
         appData.userExpenses.splice(i, 1);
         saveToDB();
@@ -265,11 +284,12 @@ window.deleteUserExpense = (i) => {
 
 function setupSaveButtons() {
     $("btn-save-user-expense").addEventListener("click", () => {
-        const expAmount = $("user-expense-amount").value;
+        const expAmount = Number($("user-expense-amount").value) || 0;
+        const expCurrency = $("user-expense-currency").value || "دينار";
         const exp = {
             user: window.loggedInUser,
             tripName: $("user-expense-trip-name").value,
-            currency: $("user-expense-currency").value,
+            currency: expCurrency,
             amount: expAmount,
             type: $("user-expense-type-select").value,
             liters: $("user-expense-liters").value,
@@ -284,8 +304,15 @@ function setupSaveButtons() {
 
         const latestFinance = getCurrentFinanceForUser();
         if (latestFinance) {
-            if (latestFinance.driverName === window.loggedInUser) latestFinance.driverAdvance = (Number(latestFinance.driverAdvance) || 0) - Number(expAmount || 0);
-            else if (latestFinance.mandoubName === window.loggedInUser) latestFinance.mandoubAdvance = (Number(latestFinance.mandoubAdvance) || 0) - Number(expAmount || 0);
+            if (latestFinance.driverName === window.loggedInUser) {
+                if (expCurrency === "دينار") latestFinance.driverLoanIQD = (Number(latestFinance.driverLoanIQD) || 0) - expAmount;
+                else if (expCurrency === "دولار") latestFinance.driverLoanUSD = (Number(latestFinance.driverLoanUSD) || 0) - expAmount;
+                else if (expCurrency === "ريال") latestFinance.driverLoanSAR = (Number(latestFinance.driverLoanSAR) || 0) - expAmount;
+            } else if (latestFinance.mandoubName === window.loggedInUser) {
+                if (expCurrency === "دينار") latestFinance.mandoubLoanIQD = (Number(latestFinance.mandoubLoanIQD) || 0) - expAmount;
+                else if (expCurrency === "دولار") latestFinance.mandoubLoanUSD = (Number(latestFinance.mandoubLoanUSD) || 0) - expAmount;
+                else if (expCurrency === "ريال") latestFinance.mandoubLoanSAR = (Number(latestFinance.mandoubLoanSAR) || 0) - expAmount;
+            }
         }
 
         $("user-expense-form").reset();
@@ -417,6 +444,9 @@ function updateUserDashboard() {
             <p><strong>الأجرة الكلية:</strong> ${latestFinance.driverTotal || 0}</p>
             <p><strong>المبلغ الواصل:</strong> ${latestFinance.driverPaid || 0}</p>
             <p><strong>المبلغ المتبقي:</strong> <span style="color: #fca5a5; font-weight:bold;">${latestFinance.driverRem || 0}</span></p>
+            <p><strong>سلفة السائق (دينار):</strong> ${latestFinance.driverLoanIQD || 0}</p>
+            <p><strong>سلفة السائق (دولار):</strong> ${latestFinance.driverLoanUSD || 0}</p>
+            <p><strong>سلفة السائق (ريال):</strong> ${latestFinance.driverLoanSAR || 0}</p>
             <p><strong>الدين السابق:</strong> ${latestFinance.driverDebt || 0}</p>
             <p><strong>سلفة إضافية عاجلة:</strong> ${latestFinance.driverAdvance || 0}</p>
             <p><strong>خصم السائق:</strong> ${latestFinance.driverDiscount || 0}</p>
@@ -425,6 +455,9 @@ function updateUserDashboard() {
             <p><strong>الأجرة الكلية:</strong> ${latestFinance.manTotal || 0}</p>
             <p><strong>المبلغ الواصل:</strong> ${latestFinance.manPaid || 0}</p>
             <p><strong>المبلغ المتبقي:</strong> <span style="color: #fca5a5; font-weight:bold;">${latestFinance.manRem || 0}</span></p>
+            <p><strong>سلفة المندوب (دينار):</strong> ${latestFinance.mandoubLoanIQD || 0}</p>
+            <p><strong>سلفة المندوب (دولار):</strong> ${latestFinance.mandoubLoanUSD || 0}</p>
+            <p><strong>سلفة المندوب (ريال):</strong> ${latestFinance.mandoubLoanSAR || 0}</p>
             <p><strong>سلفة إضافية عاجلة:</strong> ${latestFinance.mandoubAdvance || 0}</p>
             <p><strong>حوافز وإكراميات:</strong> ${latestFinance.mandoubBonus || 0}</p>
             <p><strong>خصم المندوب:</strong> ${latestFinance.mandoubDiscount || 0}</p>
@@ -433,31 +466,6 @@ function updateUserDashboard() {
     }
 
     $("user-current-trip-info").innerHTML = currentTripHtml + (financialHtml ? '<hr style="margin: 15px 0; border-color: rgba(255,255,255,0.2);">' + financialHtml : "");
-}
-
-
-// === NEW SYSTEM: AUTO USER + WALLET ===
-let wallet = {iqd:0,usd:0,sar:0};
-let spent = {iqd:0,usd:0,sar:0};
-
-function initWalletUI(){
-  const container = document.createElement("div");
-  container.innerHTML = `
-  <div class="glass-panel" style="padding:10px;margin-bottom:10px">
-  <h4>السلف</h4>
-  <p>دينار: <span id="w-iqd">0</span></p>
-  <p>دولار: <span id="w-usd">0</span></p>
-  <p>ريال: <span id="w-sar">0</span></p>
-  </div>`;
-  document.body.prepend(container);
-}
-
-function updateWalletUI(){
-  if(document.getElementById("w-iqd")){
-    document.getElementById("w-iqd").innerText = wallet.iqd - spent.iqd;
-    document.getElementById("w-usd").innerText = wallet.usd - spent.usd;
-    document.getElementById("w-sar").innerText = wallet.sar - spent.sar;
-  }
 }
 
 function autoUser(){
@@ -471,9 +479,3 @@ function autoUser(){
     });
   }
 }
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  initWalletUI();
-  autoUser();
-  updateWalletUI();
-});
