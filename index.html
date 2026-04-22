@@ -1,3 +1,4 @@
+<!-- /user_repo/index.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -67,12 +68,9 @@
                 <h2 class="glass-text">تسجيل المصاريف</h2>
                 <div class="info-card glass-panel" style="text-align: center; margin-bottom: 15px;">
                     <h3 class="glass-text" style="margin: 0; margin-bottom: 10px;">السائق/المندوب: <span id="expenses-driver-name"></span></h3>
-                    <p style="font-weight: bold;">السلف المتبقية:</p>
-                    <p style="margin-top: 5px;">
-                        دينار: <span id="expenses-loan-iqd" style="color: #ef4444; font-weight: bold;">0</span> | 
-                        دولار: <span id="expenses-loan-usd" style="color: #ef4444; font-weight: bold;">0</span> | 
-                        ريال: <span id="expenses-loan-sar" style="color: #ef4444; font-weight: bold;">0</span>
-                    </p>
+                    <p style="font-weight: bold;">تفاصيل السلف:</p>
+                    <div id="expenses-loans-container" style="margin-top: 10px; text-align: right; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                    </div>
                 </div>
                 <form class="data-form glass-panel" id="user-expense-form">
                     <div class="form-row">
@@ -159,6 +157,10 @@
                     </div>
                     <button type="button" id="btn-save-user-income" class="btn btn-primary w-100 glass-btn" style="background: rgba(16, 185, 129, 0.4) !important;">تسجيل الإيراد</button>
                 </form>
+                <div id="saved-user-incomes-container" style="margin-top: 20px;">
+                    <h3 class="section-title glass-text">الإيرادات المسجلة</h3>
+                    <ul class="reports-list" id="user-incomes-list"></ul>
+                </div>
             </section>
 
             <section id="user-bus-expenses" class="tab-content">
@@ -206,37 +208,6 @@
                     <button type="button" id="btn-save-user-bus-exp" class="btn btn-primary w-100 glass-btn" style="background: rgba(16, 185, 129, 0.4) !important;">حفظ مصاريف الباص</button>
                 </form>
             </section>
-
-            <section id="user-return" class="tab-content">
-                <h2 class="glass-text">معلومات بعد العودة</h2>
-                <form class="data-form glass-panel" id="user-return-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>اسم الرحلة</label>
-                            <select id="user-return-trip-name" class="glass-input"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>العملة</label>
-                            <select id="user-return-currency" class="glass-input"><option>دينار</option><option>دولار</option><option>ريال</option></select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>حوافز واكراميات لهذه الرحلة</label>
-                            <input type="number" id="user-return-bonus" class="glass-input">
-                        </div>
-                        <div class="form-group">
-                            <label>خصم لهذه الرحلة</label>
-                            <input type="number" id="user-return-discount" class="glass-input">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>عدد كيلو مترات الصافي</label>
-                        <input type="number" id="user-return-net-km" class="glass-input">
-                    </div>
-                    <button type="button" id="btn-save-user-return" class="btn btn-primary w-100 glass-btn" style="background: rgba(16, 185, 129, 0.4) !important;">حفظ معلومات بعد العودة</button>
-                </form>
-            </section>
         </main>
 
         <nav class="bottom-nav glass-nav">
@@ -245,7 +216,6 @@
             <a href="#" class="nav-item" data-target="user-expenses" data-role="user"><i class="fas fa-hand-holding-usd"></i><span>المصاريف</span></a>
             <a href="#" class="nav-item" data-target="user-income" data-role="user"><i class="fas fa-wallet"></i><span>الإيرادات</span></a>
             <a href="#" class="nav-item" data-target="user-bus-expenses" data-role="user"><i class="fas fa-tools"></i><span>مصاريف الباص</span></a>
-            <a href="#" class="nav-item" data-target="user-return" data-role="user"><i class="fas fa-rotate-left"></i><span>بعد العودة</span></a>
         </nav>
     </div>
 
