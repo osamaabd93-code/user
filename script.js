@@ -421,11 +421,13 @@ function setupSaveButtons() {
     });
 
     $("btn-save-user-bus-exp").addEventListener("click", () => {
+        const expAmount = Number($("user-bus-exp-amount").value) || 0;
+        const expCurrency = $("user-bus-exp-currency").value || "دينار";
         const busExp = {
             user: window.loggedInUser,
             tripName: $("user-bus-exp-trip-name").value,
-            currency: $("user-bus-exp-currency").value,
-            amount: $("user-bus-exp-amount").value,
+            currency: expCurrency,
+            amount: expAmount,
             date: $("user-bus-exp-date").value,
             opts: $("user-bus-opts-select").value,
             driver: $("user-bus-driver-select").value,
@@ -434,9 +436,50 @@ function setupSaveButtons() {
         };
         if (!appData.userBusExpenses) appData.userBusExpenses = [];
         appData.userBusExpenses.push(busExp);
+
+        const latestFinance = getCurrentFinanceForUser();
+        if (latestFinance) {
+            let rExp = expAmount;
+            const loggedUser = window.loggedInUser.trim();
+            const isDriver = (latestFinance.driverName || "").trim() === loggedUser;
+            const isMandoub = (latestFinance.mandoubName || "").trim() === loggedUser;
+            if (isDriver || isMandoub) {
+                const prefix = isDriver ? "driver" : "mandoub";
+                
+                if (latestFinance[`original${prefix}Advance`] === undefined) latestFinance[`original${prefix}Advance`] = Number(latestFinance[`${prefix}Advance`]) || 0;
+                if (latestFinance[`original${prefix}LoanIQD`] === undefined) latestFinance[`original${prefix}LoanIQD`] = Number(latestFinance[`${prefix}LoanIQD`]) || 0;
+                if (latestFinance[`original${prefix}LoanUSD`] === undefined) latestFinance[`original${prefix}LoanUSD`] = Number(latestFinance[`${prefix}LoanUSD`]) || 0;
+                if (latestFinance[`original${prefix}LoanSAR`] === undefined) latestFinance[`original${prefix}LoanSAR`] = Number(latestFinance[`${prefix}LoanSAR`]) || 0;
+                
+                if (latestFinance[`expIqd${prefix}`] === undefined) latestFinance[`expIqd${prefix}`] = 0;
+                if (latestFinance[`expUsd${prefix}`] === undefined) latestFinance[`expUsd${prefix}`] = 0;
+                if (latestFinance[`expSar${prefix}`] === undefined) latestFinance[`expSar${prefix}`] = 0;
+
+                if (latestFinance.currency === expCurrency && Number(latestFinance[`${prefix}Advance`]) > 0) {
+                    let adv = Number(latestFinance[`${prefix}Advance`]);
+                    if (adv >= rExp) {
+                        latestFinance[`${prefix}Advance`] = adv - rExp;
+                        rExp = 0;
+                    } else {
+                        rExp -= adv;
+                        latestFinance[`${prefix}Advance`] = 0;
+                    }
+                }
+
+                if (rExp > 0) {
+                    let field = `${prefix}Loan` + (expCurrency === "دينار" ? "IQD" : expCurrency === "دولار" ? "USD" : "SAR");
+                    latestFinance[field] = (Number(latestFinance[field]) || 0) - rExp;
+                }
+
+                let accField = `exp` + (expCurrency === "دينار" ? "Iqd" : expCurrency === "دولار" ? "Usd" : "Sar") + prefix;
+                latestFinance[accField] += expAmount;
+            }
+        }
+
         $("user-bus-expense-form").reset();
         $("user-bus-exp-file-base64").value = "";
         saveToDB();
+        refreshAllUI();
         showCustomAlert("تم حفظ مصاريف الباص بنجاح");
     });
 }
