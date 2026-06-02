@@ -1,4 +1,3 @@
-<!-- /user_repo/index.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,6 +6,8 @@
     <title>نظام إدارة النقل والرحلات - السائق والمندوب</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#059669">
 </head>
 <body>
 
@@ -222,6 +223,16 @@
     <div id="image-modal" class="modal hidden glass-modal">
         <span class="close-modal">&times;</span>
         <img class="modal-content" id="modal-img">
+    </div>
+
+    <div id="pwa-install-modal" class="modal hidden glass-modal" style="z-index: 3000;">
+        <div class="modal-content glass-panel" style="background: rgba(15, 23, 42, 0.95); padding: 25px; text-align: center; border-radius: 12px; max-width: 350px; position: relative;">
+            <span id="close-install-modal" class="close-modal" style="top: 5px; right: 15px; font-size: 30px; color: white;">&times;</span>
+            <img src="./icon-192x192.png" alt="أيقونة التطبيق" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+            <h3 class="glass-text" style="margin-bottom: 10px;">تثبيت التطبيق</h3>
+            <p style="margin-bottom: 20px; font-size: 0.9rem; color: #ccc;">قم بتثبيت التطبيق على جهازك للوصول السريع والعمل دون اتصال.</p>
+            <button id="btn-install-pwa" class="btn glass-btn" style="background: rgba(16, 185, 129, 0.8) !important; color: white; width: 100%;">تثبيت الآن</button>
+        </div>
     </div>
 
     <div id="custom-alert-container" class="custom-alert-container"></div>
