@@ -593,3 +593,64 @@ function autoUser(){
     });
   }
 }
+
+// --- إعدادات وتفعيل PWA ---
+
+let deferredPrompt;
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+                console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // منع ظهور الموجه الافتراضي للنظام
+    e.preventDefault();
+    // حفظ الحدث للاستخدام لاحقاً
+    deferredPrompt = e;
+    
+    // إظهار نافذة التثبيت المخصصة التي قمنا بإضافتها
+    const installModal = document.getElementById('pwa-install-modal');
+    if(installModal) {
+        installModal.classList.remove('hidden');
+        installModal.style.display = 'block';
+    }
+});
+
+// التعامل مع أزرار التثبيت والإغلاق في النافذة المخصصة
+document.addEventListener("DOMContentLoaded", () => {
+    const installBtn = document.getElementById('btn-install-pwa');
+    const closeInstallBtn = document.getElementById('close-install-modal');
+    const installModal = document.getElementById('pwa-install-modal');
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (installModal) {
+                installModal.style.display = 'none';
+                installModal.classList.add('hidden');
+            }
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+            }
+        });
+    }
+
+    if (closeInstallBtn) {
+        closeInstallBtn.addEventListener('click', () => {
+            if (installModal) {
+                installModal.style.display = 'none';
+                installModal.classList.add('hidden');
+            }
+        });
+    }
+});
